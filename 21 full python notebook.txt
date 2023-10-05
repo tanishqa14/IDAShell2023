@@ -1,0 +1,111 @@
+import findspark
+
+findspark.init()
+
+findspark.find()
+
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("WordCount").getOrCreate()
+
+sc = spark.sparkContext
+
+rdd = sc.parallelize([1,23,4,5])
+rdd.collect()
+
+resultrdd = rdd.map(lambda x : x * 2)
+resultrdd.collect()
+
+rdd1 = sc.parallelize([1,2,3,4,5])
+
+resultrdd1=rdd1.flatMap(lambda x:(x,x*2))
+resultrdd1.collect()
+
+rdd3=sc.parallelize([1,2,3,4,56,7])
+
+resultrdd3=rdd3.filter(lambda x : x%2==0)
+resultrdd3.collect()
+
+rdd4=sc.parallelize([(1,2),(3,4),(1,6),(2,3)])
+resrdd4 = rdd4.reduceByKey(lambda x,y : x+y)#aggregating based on same key
+resrdd4.collect()
+
+import findspark
+
+pyspark.find()
+
+
+findspark.init()
+
+findspark.find()
+
+rdd5=sc.parallelize([(1,2),(3,4),(1,6),(2,3)])
+resrdd5 = rdd5.groupByKey()#aggregating based on same key
+resrdd5.collect()
+
+for key,values in resrdd5.collect():
+    print(f"Key: {key}, Values: {list(values)}")
+
+word_list=["this", "is", "a", "sample", "text", "for", "word", "count", "example", "word", "count"]
+
+rdd6 = sc.parallelize(word_list)
+
+# wordcount = rdd6.flatMap(lambda x: (x, word_list.count(x)))
+samp = []
+for word in word_list:
+    samp.append((word, 1))
+rdd7 = sc.parallelize(samp)
+ans = rdd7.groupByKey().mapValues(len)
+ans1 = rdd7.reduceByKey(lambda a,b: a + b)
+# wordcount.collect()
+ans1.collect()
+
+
+purchaserdd=sc.textFile('/home/labuser/Downloads/Pandas_datasets/purchases.csv')
+
+purchaserdd.collect()
+
+purchasedf=spark.read.csv('/home/labuser/Downloads/Pandas_datasets/purchases.csv')
+
+purchasedf.show()
+
+purchasedf_01=spark.read.option("inferSchema",True).option("header",True).csv('/home/labuser/Downloads/Pandas_datasets/purchases.csv')
+purchasedf_01.show()
+#inferSchema not preferred because it reads through the whole file and takes a lot of time
+
+purchasedf_01.printSchema()
+
+purchasedf.printSchema()
+
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+udfschema = StructType([StructField("Rank", IntegerType(), True), StructField("Title", StringType(), True), StructField("Genre", StringType(), True)])
+imdb=spark.read.schema(udfschema).option("header",True).csv('/home/labuser/Downloads/Pandas_datasets/IMDB-Movie-Data.csv')
+
+imdb.show()
+
+imdb.printSchema()
+
+imdbdf_01=spark.read.option("inferSchema",True).option("header",True).csv('/home/labuser/Downloads/Pandas_datasets/IMDB-Movie-Data.csv')
+
+imdbdf_01.show()
+
+from pyspark.sql.functions import *
+imdbdf_01 = imdbdf_01.withColumn("rev_new", col("Revenue (Millions)")*100)
+
+imdbdf_01.show()
+
+imdbdf_01 = imdbdf_01.withColumn("rev_new", col("Revenue (Millions)")*100).withColumn("batch", lit("Batch 03")) ##adding a new column batch with every value as batch 03
+
+import time
+
+from datetime import datetime
+
+now = datetime.now()
+
+current_time = now.strftime("%H:%M:%S")
+
+imdbdf_01 = imdbdf_01.withColumn("rev_new", col("Revenue (Millions)")*100).withColumn("batch", lit("Batch 03")).withColumn("updated time", lit(now))
+
+imdbdf_01.show()
+
+'
